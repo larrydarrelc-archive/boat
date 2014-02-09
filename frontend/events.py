@@ -22,3 +22,13 @@ def terminate(request, data):
 @events.reg('warn')
 def warning(request, data):
     logger.warn('Recevied warning from backend: %s' % (data))
+
+
+@events.reg('update')
+def update(request, data):
+    import socket
+
+    client = socket.socket()
+    client.connect(('127.0.0.1', 1234))
+    client.send('update:%s\n' % (data))
+    logger.info('Sending %s to backend' % (data))

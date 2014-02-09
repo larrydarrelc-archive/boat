@@ -22,6 +22,11 @@ class BackendServer(TCPServer):
         if client in cls.clients:
             cls.clients.remove(client)
 
+    @classmethod
+    def broadcast(cls, data):
+        for client in cls.clients:
+            client.write(data)
+
     def __init__(self, port, dispatcher, **settings):
         super(BackendServer, self).__init__(**settings)
         self.port = int(port)

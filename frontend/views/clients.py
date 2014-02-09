@@ -26,6 +26,11 @@ class ClientHandler(tornado.websocket.WebSocketHandler):
         if client in cls.clients:
             cls.clients.remove(client)
 
+    @classmethod
+    def broadcast(cls, data):
+        for client in cls.clients:
+            client.write(data)
+
     def initialize(self, dispatcher, logger=None):
         '''Initialize the handler.
 
@@ -34,6 +39,10 @@ class ClientHandler(tornado.websocket.WebSocketHandler):
         '''
         self.dispatcher = dispatcher
         self.logger = logger or logging.getLogger(__name__)
+
+    def write(self, message, binary=False):
+        # TODO Need to make a interface?
+        self.write_message(message, binary)
 
     def open(self):
         self.logger.info('Accept new client connection.')

@@ -6,6 +6,7 @@ import urllib
 from tornado.httpclient import AsyncHTTPClient
 
 from utils.dispatch import Register
+from .server import BackendServer
 
 
 logger = logging.getLogger(__name__)
@@ -28,3 +29,10 @@ def warn_frontend(request, data):
     client = AsyncHTTPClient()
     payload = urllib.urlencode({'message': 'warn:%r' % (data.strip())})
     client.fetch('http://127.0.0.1:1235/backend', method='POST', body=payload)
+
+
+@events.reg('update')
+def update(request, data):
+    logger.info('Broadcasting to all clients')
+    request.close()
+    BackendServer.broadcast(data)
