@@ -12,14 +12,16 @@ class IOStreamRequest(object):
 
     :param stream: a ~:class:`tornado.iostream.IOStream` instance
     :param dispatcher: a ~:class:`utils.dispatch.Dispatcher` instance
+    :param container: clients container
     '''
 
     FRAME_END = '\n'
 
-    def __init__(self, stream, dispatcher):
+    def __init__(self, stream, dispatcher, container):
         self._dispatcher = dispatcher
         self._stream = stream
         self._stream.read_until(self.FRAME_END, self._read_frame)
+        self.container = container
 
         self.data = ''
 
@@ -45,7 +47,12 @@ class IOStreamRequest(object):
         return self.data
 
     def write(self, data):
-        self._stream.write(data)
+        if self._stream.closed():
+            self.close()
+        else:
+            self._stream.write(data)
 
     def close(self):
+        self.logger.info('Connection closed.')
+        self.container.remove_client(self)
         self._stream.close()

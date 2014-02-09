@@ -23,7 +23,8 @@ class ClientHandler(tornado.websocket.WebSocketHandler):
 
     @classmethod
     def remove_client(cls, client):
-        cls.clients.remove(client)
+        if client in cls.clients:
+            cls.clients.remove(client)
 
     def initialize(self, dispatcher, logger=None):
         '''Initialize the handler.
@@ -36,6 +37,7 @@ class ClientHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         self.logger.info('Accept new client connection.')
+        # TODO Need to make a interface?
         ClientHandler.add_client(self)
 
     def on_message(self, msg):

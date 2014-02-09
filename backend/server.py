@@ -9,6 +9,19 @@ from .compat import IOStreamRequest
 
 class BackendServer(TCPServer):
 
+    # All connected clients.
+    clients = []
+
+    @classmethod
+    def add_client(cls, client):
+        if client not in cls.clients:
+            cls.clients.append(client)
+
+    @classmethod
+    def remove_client(cls, client):
+        if client in cls.clients:
+            cls.clients.remove(client)
+
     def __init__(self, port, dispatcher, **settings):
         super(BackendServer, self).__init__(**settings)
         self.port = int(port)
@@ -20,4 +33,6 @@ class BackendServer(TCPServer):
         self.listen(self.port)
 
     def handle_stream(self, stream, address):
-        IOStreamRequest(stream, self.dispatcher)
+        self.logger.info('Accept new client connection.')
+        client = IOStreamRequest(stream, self.dispatcher, BackendServer)
+        BackendServer.add_client(client)
