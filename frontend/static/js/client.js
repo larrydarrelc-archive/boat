@@ -1,6 +1,7 @@
 (function() {
     var container = document.querySelector('.main'),
-        control = document.querySelector('textarea[name="control"]'),
+        eventName = document.querySelector('input[name="control__event-name"]'),
+        eventData = document.querySelector('input[name="control__event-data"]'),
         controlBtn = document.querySelector('button.control__submit');
 
     var ws = new WebSocket('ws://127.0.0.1:1235/client');
@@ -22,7 +23,7 @@
     };
 
     controlBtn.onclick = function (e) {
-        ws.send(control.value);
-        control.value = '';
+        ws.send(eventName.value + ':' + eventData.value);
+        eventName.value = eventData.value = '';
     };
 })();
