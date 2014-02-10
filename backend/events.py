@@ -1,11 +1,9 @@
 #coding: utf-8
 
 import logging
-import urllib
 
-from tornado.httpclient import AsyncHTTPClient
-
-from utils.dispatch import Register
+from core.dispatch import Register
+from frontend.utils import send_to_frontend
 from .server import BackendServer
 
 
@@ -26,9 +24,7 @@ def terminate(request, data):
 @events.reg('warn')
 def warn_frontend(request, data):
     logger.warn('Notifying warning: %s' % (data))
-    client = AsyncHTTPClient()
-    payload = urllib.urlencode({'message': 'warn:%r' % (data.strip())})
-    client.fetch('http://127.0.0.1:1235/backend', method='POST', body=payload)
+    send_to_frontend('warn', data.strip())
 
 
 @events.reg('update')

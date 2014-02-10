@@ -2,8 +2,9 @@
 
 import logging
 
-from backend.protocol import serialize
-from utils.dispatch import Register
+from backend.utils import send_to_backend
+from core.dispatch import Register
+from .views import ClientHandler
 
 
 logger = logging.getLogger(__name__)
@@ -23,14 +24,11 @@ def terminate(request, data):
 @events.reg('warn')
 def warning(request, data):
     logger.warn('Recevied warning from backend: %s' % (data))
+    ClientHandler.broadcast(data)
 
 
 @events.reg('update')
 def update(request, data):
     logger.info('Sending %s to backend' % (data))
 
-    import socket
-
-    client = socket.socket()
-    client.connect(('127.0.0.1', 1234))
-    client.send(serialize('update', data))
+    send_to_backend('update', data)

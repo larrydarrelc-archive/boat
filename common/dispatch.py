@@ -1,6 +1,6 @@
 #coding: utf-8
 
-from utils.dispatch import BaseDispatcher
+from core.dispatch import BaseDispatcher
 from backend.protocol import parse
 
 
