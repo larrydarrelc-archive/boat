@@ -1,6 +1,7 @@
 #coding: utf-8
 
 from utils.dispatch import BaseDispatcher
+from backend.protocol import parse
 
 
 __all__ = ['Dispatcher']
@@ -13,8 +14,4 @@ class Dispatcher(BaseDispatcher):
     '''
 
     def dispatch(self, raw):
-        incomes = raw.split(':')
-        event_name = incomes.pop(0)
-        event_data = ':'.join(incomes)
-
-        return event_name, event_data
+        return parse(raw)

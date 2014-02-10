@@ -2,6 +2,7 @@
 
 import logging
 
+from backend.protocol import serialize
 from utils.dispatch import Register
 
 
@@ -26,9 +27,10 @@ def warning(request, data):
 
 @events.reg('update')
 def update(request, data):
+    logger.info('Sending %s to backend' % (data))
+
     import socket
 
     client = socket.socket()
     client.connect(('127.0.0.1', 1234))
-    client.send('update:%s\n' % (data))
-    logger.info('Sending %s to backend' % (data))
+    client.send(serialize('update', data))

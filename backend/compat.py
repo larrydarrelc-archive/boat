@@ -2,6 +2,8 @@
 
 import logging
 
+from .protocol import FRAME_END
+
 
 class IOStreamRequest(object):
     '''Wrap ~:class:`tornado.iostream.IOStream to make it compatible to
@@ -15,12 +17,10 @@ class IOStreamRequest(object):
     :param container: clients container
     '''
 
-    FRAME_END = '\n'
-
     def __init__(self, stream, dispatcher, container):
         self._dispatcher = dispatcher
         self._stream = stream
-        self._stream.read_until(self.FRAME_END, self._read_frame)
+        self._stream.read_until(FRAME_END, self._read_frame)
         self.container = container
 
         self.data = ''
@@ -41,7 +41,7 @@ class IOStreamRequest(object):
 
         # Read next frame.
         if not self._stream.closed():
-            self._stream.read_until(self.FRAME_END, self._read_frame)
+            self._stream.read_until(FRAME_END, self._read_frame)
 
     def read(self, num_bytes):
         return self.data
