@@ -29,6 +29,7 @@ class BackendServer(TCPServer):
 
     def __init__(self, port, dispatcher, **settings):
         super(BackendServer, self).__init__(**settings)
+        self.settings = settings
         self.port = int(port)
         self.dispatcher = dispatcher
         self.logger = logging.getLogger(__name__)

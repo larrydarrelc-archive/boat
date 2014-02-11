@@ -25,8 +25,9 @@ class Server(object):
         self.port = port
         self.dispatcher = dispatcher
         self.logger = logger or logging.getLogger(__name__)
+        self.settings = settings
 
-        # Inject settings.
+        # Inject components.
         for url in self.urls:
             if isinstance(url[-1], dict):
                 args = url[-1]

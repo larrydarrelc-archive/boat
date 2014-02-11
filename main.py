@@ -1,21 +1,28 @@
 #coding: utf-8
 
-from importlib import import_module
-
 import tornado.ioloop
 
 import backend
 import frontend
+from core.config import Config
+
+
+def setup_logging(config):
+    import logging.config
+
+    logging.config.fileConfig(config.get('LOGGING_CONF'))
 
 
 def run():
-    # A ugly hack to setup logging configurations.
-    import_module('configs.default')
+    config = Config()
+    config.from_object('configs.default')
 
-    backend_app = backend.build()
+    setup_logging(config)
+
+    backend_app = backend.build(**config)
     backend_app.run()
 
-    frontend_app = frontend.build()
+    frontend_app = frontend.build(**config)
     frontend_app.run()
 
     tornado.ioloop.IOLoop.instance().start()
