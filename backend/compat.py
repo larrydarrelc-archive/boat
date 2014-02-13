@@ -1,6 +1,6 @@
 #coding: utf-8
 
-import logging
+import structlog
 
 from .protocol import FRAME_END
 
@@ -25,7 +25,7 @@ class IOStreamRequest(object):
 
         self.data = ''
 
-        self.logger = logging.getLogger(__name__)
+        self.logger = structlog.get_logger(__name__)
 
     def _read_frame(self, data):
         self.data = data

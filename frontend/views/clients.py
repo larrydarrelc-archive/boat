@@ -1,6 +1,6 @@
 #coding: utf-8
 
-import logging
+import structlog
 
 import tornado.websocket
 
@@ -38,7 +38,7 @@ class ClientHandler(tornado.websocket.WebSocketHandler):
         :param logger: logger instance
         '''
         self.dispatcher = dispatcher
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or structlog.get_logger(__name__)
 
     def write(self, message, binary=False):
         # TODO Need to make a interface?

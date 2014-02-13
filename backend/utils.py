@@ -1,6 +1,6 @@
 #coding: utf-8
 
-import logging
+import structlog
 import socket
 
 from .protocol import serialize
@@ -9,7 +9,7 @@ from .protocol import serialize
 MAX_TRY = 10
 
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 def _send_to_backend(event_name, event_data, client=None, tried=None):

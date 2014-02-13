@@ -1,6 +1,6 @@
 #coding: utf-8
 
-import logging
+import structlog
 
 import tornado.web
 
@@ -19,7 +19,7 @@ class BackendHandler(tornado.web.RequestHandler):
         :param logger: logger instance
         '''
         self.dispatcher = dispatcher
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or structlog.get_logger(__name__)
 
     def post(self):
         msg = self.get_body_argument('message')

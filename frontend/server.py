@@ -1,7 +1,7 @@
 #coding: utf-8
 
 import os
-import logging
+import structlog
 
 import tornado.web
 
@@ -24,7 +24,7 @@ class Server(object):
     def __init__(self, port, dispatcher, logger=None, **settings):
         self.port = port
         self.dispatcher = dispatcher
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or structlog.get_logger(__name__)
         self.settings = settings
 
         # Inject components.

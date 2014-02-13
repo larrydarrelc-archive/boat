@@ -1,13 +1,13 @@
 #coding: utf-8
 
-import logging
+import structlog
 
 from backend.utils import send_to_backend
 from core.dispatch import Register
 from .views import ClientHandler
 
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 events = Register()
 
 

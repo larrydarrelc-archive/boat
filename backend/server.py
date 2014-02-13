@@ -1,7 +1,6 @@
 #coding: utf-8
 
-import logging
-
+import structlog
 from tornado.tcpserver import TCPServer
 
 from .compat import IOStreamRequest
@@ -32,7 +31,7 @@ class BackendServer(TCPServer):
         self.settings = settings
         self.port = int(port)
         self.dispatcher = dispatcher
-        self.logger = logging.getLogger(__name__)
+        self.logger = structlog.get_logger(__name__)
 
     def run(self):
         self.logger.info('Backend server starts listening on %d.' % self.port)
