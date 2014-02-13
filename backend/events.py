@@ -32,3 +32,13 @@ def update(request, data):
     logger.info('Broadcasting to all clients')
     request.close()
     BackendServer.broadcast(data)
+
+
+@events.reg('logging')
+def logging_message(request, data):
+    '''处理控制器发过来的报警信息'''
+    logger.bind(event='logging')
+    logger.info('Received logging message from controller.', data=data)
+
+    # Propogate to frontend.
+    send_to_frontend('logging', data)

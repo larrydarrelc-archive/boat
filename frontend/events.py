@@ -1,9 +1,13 @@
 #coding: utf-8
 
+import json
+from time import time as current_timestamp
+
 import structlog
 
 from backend.utils import send_to_backend
 from core.dispatch import Register
+from core.sqlstore import store
 from .views import ClientHandler
 
 
@@ -32,3 +36,24 @@ def update(request, data):
     logger.info('Sending %s to backend' % (data))
 
     send_to_backend('update', data)
+
+
+@events.reg('logging')
+def logging_message(request, data):
+    '''处理后端发过来的报警信息'''
+    logger.bind(event='logging')
+    logger.info('Received logging message from backend.', raw_data=data)
+
+    current = current_timestamp()
+
+    cur = store.get_cursor()
+    cur.execute('INSERT INTO `logging` (message, timestamp, solved) '
+                'VALUES (?, ?, ?)',
+                (data, current, 0))
+    store.commit()
+
+    data = json.loads(data)
+    data['time'] = current_timestamp()
+    data = json.dumps(data)
+
+    ClientHandler.broadcast(json.dumps(data))
