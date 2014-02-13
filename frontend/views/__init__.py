@@ -3,3 +3,4 @@
 from .main import *
 from .clients import *
 from .backend import *
+from .test import *

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>logging list</title>
+</head>
+<body>
+    <div class="main">
+        <div class="logging-list">
+            <div class="logging-list__header"></div>
+            <div class="logging-list__body">
+                <ul class="logging-list__items">
+                    <script class="logging-list__items__item-tmpl" type="text/html">
+                        <li class="logging-list__items__item"><%= content %></li>
+                    </script>
+                </ul>
+            </div>
+            <div class="logging-list__footer"></div>
+        </div>
+    </div>
+    
+    <script src="{{ static_url('js/logging-list.js') }}"></script>
+</body>
+</html>

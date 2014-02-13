@@ -47,13 +47,30 @@ def logging_message(request, data):
     current = current_timestamp()
 
     cur = store.get_cursor()
-    cur.execute('INSERT INTO `logging` (message, timestamp, solved) '
+    cur.execute('INSERT INTO logging (message, timestamp, solved) '
                 'VALUES (?, ?, ?)',
                 (data, current, 0))
     store.commit()
 
     data = json.loads(data)
     data['time'] = current_timestamp()
-    data = json.dumps(data)
+    data = json.dumps({
+        'event': 'logging',
+        'data': data
+    })
 
-    ClientHandler.broadcast(json.dumps(data))
+    ClientHandler.broadcast(data)
+
+
+@events.reg('logging-poll')
+def logging_poll(request, data):
+    '''获取报警信息列表'''
+    logger.bind(event='logging-poll')
+
+    cur = store.get_cursor()
+    cur.execute('SELECT * FROM logging WHERE solved = 0')
+
+    request.write(json.dumps({
+        'event': 'logging-poll',
+        'data': cur.fetchall()
+    }))

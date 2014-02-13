@@ -23,6 +23,7 @@ class Server(object):
         (r'/client', views.ClientHandler, dict(dispatcher=None, logger=None)),
         (r'/backend', views.BackendHandler,
          dict(dispatcher=None, logger=None)),
+        (r'/test/(.*)', views.TestPageHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, dict(path=None))
     )
 
