@@ -30,7 +30,7 @@ class Server(object):
         self.port = port
         self.dispatcher = dispatcher
         self.logger = logger or structlog.get_logger(__name__)
-        Server.settings = settings
+        Server.settings.update(settings)
 
         # Inject components.
         for url in self.urls:

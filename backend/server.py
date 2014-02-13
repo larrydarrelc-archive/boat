@@ -33,7 +33,7 @@ class BackendServer(TCPServer):
 
     def __init__(self, port, dispatcher, **settings):
         super(BackendServer, self).__init__(**settings)
-        BackendServer.settings = settings
+        BackendServer.settings.update(settings)
         self.port = int(port)
         self.dispatcher = dispatcher
         self.logger = structlog.get_logger(__name__)

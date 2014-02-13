@@ -18,8 +18,8 @@ def _send_to_backend(event_name, event_data, client=None, tried=None):
 
     if not client:
         client = socket.socket()
-        dest = Server.settings.get('BACKEND_DEST', 'localhost')
-        port = Server.settings.get('BACKEND_PORT', 1235)
+        dest = Server.settings['BACKEND_DEST']
+        port = Server.settings['BACKEND_PORT']
         client.connect((dest, port))
 
     try:
