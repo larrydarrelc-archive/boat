@@ -8,6 +8,11 @@ from .compat import IOStreamRequest
 
 class BackendServer(TCPServer):
 
+    settings = {
+        'BACKEND_PORT': 1234,
+        'BACKEND_DEST': '127.0.0.1'
+    }
+
     # All connected clients.
     clients = []
 
@@ -28,7 +33,7 @@ class BackendServer(TCPServer):
 
     def __init__(self, port, dispatcher, **settings):
         super(BackendServer, self).__init__(**settings)
-        self.settings = settings
+        BackendServer.settings = settings
         self.port = int(port)
         self.dispatcher = dispatcher
         self.logger = structlog.get_logger(__name__)

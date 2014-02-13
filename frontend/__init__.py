@@ -7,7 +7,8 @@ from common import Dispatcher
 
 
 def build(**settings):
-    port = os.environ.get('FRONTEND_PORT') or settings.get('port', 1235)
+    port_key = 'FRONTEND_PORT'
+    port = os.environ.get(port_key) or settings.get(port_key, 1235)
 
     dispatcher = Dispatcher()
 

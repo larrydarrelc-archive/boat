@@ -13,6 +13,11 @@ CURRENT_DIR = os.path.dirname(__file__)
 
 class Server(object):
 
+    settings = {
+        'FRONTEND_PORT': 1235,
+        'FRONTEND_DEST': 'http://127.0.0.1'
+    }
+
     urls = (
         (r'/', views.MainHandler),
         (r'/client', views.ClientHandler, dict(dispatcher=None, logger=None)),
@@ -25,7 +30,7 @@ class Server(object):
         self.port = port
         self.dispatcher = dispatcher
         self.logger = logger or structlog.get_logger(__name__)
-        self.settings = settings
+        Server.settings = settings
 
         # Inject components.
         for url in self.urls:

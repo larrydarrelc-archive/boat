@@ -3,6 +3,7 @@
 import structlog
 import socket
 
+from .server import BackendServer as Server
 from .protocol import serialize
 
 
@@ -17,7 +18,9 @@ def _send_to_backend(event_name, event_data, client=None, tried=None):
 
     if not client:
         client = socket.socket()
-        client.connect(('127.0.0.1', 1234))
+        dest = Server.settings.get('BACKEND_DEST', 'localhost')
+        port = Server.settings.get('BACKEND_PORT', 1235)
+        client.connect((dest, port))
 
     try:
         client.send(serialize(event_name, event_data))

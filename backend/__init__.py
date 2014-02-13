@@ -8,7 +8,8 @@ from .server import BackendServer
 
 
 def build(**settings):
-    port = os.environ.get('BACKEND_PORT') or settings.get('port', 1234)
+    port_key = 'BACKEND_PORT'
+    port = os.environ.get(port_key) or settings.get(port_key, 1234)
 
     dispatcher = Dispatcher()
 
