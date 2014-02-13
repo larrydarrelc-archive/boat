@@ -27,11 +27,18 @@ def setup_logging(config):
     )
 
 
+def setup_database(path):
+    from core.sqlstore import store
+
+    store.configure(path=path)
+
+
 def run():
     config = Config()
     config.from_object('configs.default')
 
     setup_logging(config)
+    setup_database(config.get('DB_PATH'))
 
     backend_app = backend.build(**config)
     backend_app.run()
