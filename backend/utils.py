@@ -4,7 +4,7 @@ import structlog
 import socket
 
 from .server import BackendServer as Server
-from .protocol import serialize
+from .message import serialize
 
 
 MAX_TRY = 10

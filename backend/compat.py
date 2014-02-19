@@ -2,7 +2,7 @@
 
 import structlog
 
-from .protocol import FRAME_END
+from .message import FRAME_END
 
 
 class IOStreamRequest(object):

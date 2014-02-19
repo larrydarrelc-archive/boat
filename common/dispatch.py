@@ -1,7 +1,7 @@
 #coding: utf-8
 
 from core.dispatch import BaseDispatcher
-from backend.protocol import parse
+from backend.message import parse
 
 
 __all__ = ['Dispatcher']
