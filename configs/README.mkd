@@ -1,0 +1,19 @@
+# Boat Server Configurations
+
+## Items Registeration
+
+Example:
+
+```
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "temparature"
+    },
+    {
+      "name": "wind speed"
+    }
+  ]
+}
+```
