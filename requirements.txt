@@ -1,3 +1,4 @@
 -ihttp://pypi.douban.com/simple/
 tornado
 structlog
+pyyaml
