@@ -1,5 +1,7 @@
 #coding: utf-8
 
+import re
+
 
 class EventNotFoundError(Exception):
     pass
@@ -12,6 +14,42 @@ class Register(object):
         # Callback functions map, use `event_name` as key.
         self.callbacks = {}
 
+        # Event patterns map, use `event_name` as key.
+        self.patterns = {}
+
+    def create_pattern(self, event_name):
+        '''Generate a pattern match function from `event_name`.
+
+        :param event_name: event's name
+        '''
+        converters = {
+            'int': '(\d+)',
+            'str': '(\w+)'
+        }
+        format_ = re.compile('(.*)<(.*)>')
+        converter_ = re.compile('(.*):(.*)')
+        params = []
+        converter = 'str'
+
+        while True:
+            matched = format_.match(event_name)
+            if matched is None:
+                break
+            event_name, param = matched.groups()
+            matched = converter_.match(param)
+            if matched:
+                converter, param = matched.groups()
+            event_name = '%s%s' % (event_name, converters[converter])
+            params.append(param)
+        # Using greedy matching here,
+        # so the rightest will be matched first.
+        params.reverse()
+
+        return {
+            'pattern': re.compile(event_name),
+            'params': params
+        }
+
     def register_callback(self, event_name, func):
         '''Register a callback function.
 
@@ -21,9 +59,10 @@ class Register(object):
             - `data`: Optional data from the request object.
 
         :param event_name: event's name
-        :param func: callbaack function
+        :param func: callback function
         '''
         self.callbacks[event_name] = func
+        self.patterns[event_name] = self.create_pattern(event_name)
 
     def reg(self, event_name):
         '''Register a callback function with decorator:
@@ -35,6 +74,18 @@ class Register(object):
         def wrapper(func):
             self.register_callback(event_name, func)
         return wrapper
+
+    def get(self, event_name):
+        '''Retrieve a callback function with event_name.
+
+        :param event_name: event name
+        '''
+        for k, v in self.callbacks.items():
+            pattern = self.patterns[k]
+            matched = pattern['pattern'].match(event_name)
+            if matched is not None:
+                return v, dict(zip(pattern['params'], matched.groups()))
+        return None
 
 
 class BaseDispatcher(Register):
@@ -112,7 +163,8 @@ class BaseDispatcher(Register):
         incomes = request.read(self.message_buffer_size)
         event_name, event_data = self.dispatch(incomes)
 
-        try:
-            return self.callbacks[event_name](request, event_data)
-        except KeyError:
+        rv = self.get(event_name)
+        if rv is None:
             raise EventNotFoundError(event_name)
+        callback, params = rv
+        return callback(request, event_data, **params)
