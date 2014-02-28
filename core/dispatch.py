@@ -148,6 +148,7 @@ class BaseDispatcher(Register):
     def add_group(self, group):
         '''Add ~:class:`Register` registered callback functions.'''
         self.callbacks.update(group.callbacks)
+        self.patterns.update(group.patterns)
 
     def dispatch(self, raw):
         '''Put your own pattern parsing implementation here.
