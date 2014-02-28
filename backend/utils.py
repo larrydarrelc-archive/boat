@@ -26,7 +26,7 @@ def _send_to_backend(event_name, event_data, client=None, tried=None):
         client.send(serialize(event_name, event_data))
         return client
     except socket.error as e:
-        logger.warn('Send to backend failed, exec: %r' % (e))
+        logger.warning('Send to backend failed, exec: %r' % (e))
         # Try again with new connection.
         if tried < MAX_TRY:
             return _send_to_backend(event_name, event_data, tried=tried + 1)

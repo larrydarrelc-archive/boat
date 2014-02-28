@@ -35,7 +35,8 @@ class IOStreamRequest(object):
             self._dispatcher(self)
         except Exception as e:
             # TODO Let's talk about error tolerance here.
-            self.logger.warn('Got error while dispatching %r %r' % (data, e))
+            self.logger.warning(
+                'Got error while dispatching %r %r' % (data, e))
 
         self.data = ''
 
