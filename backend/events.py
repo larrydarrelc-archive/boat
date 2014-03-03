@@ -4,7 +4,6 @@ import structlog
 
 from core.dispatch import Register
 from frontend.utils import send_to_frontend
-from .server import BackendServer
 
 
 logger = structlog.get_logger(__name__)
@@ -21,24 +20,13 @@ def terminate(request, data):
     request.close()
 
 
-@events.reg('warn')
-def warn_frontend(request, data):
-    logger.warn('Notifying warning: %s' % (data))
-    send_to_frontend('warn', data.strip())
-
-
-@events.reg('update')
-def update(request, data):
-    logger.info('Broadcasting to all clients')
-    request.close()
-    BackendServer.broadcast(data)
-
-
-@events.reg('logging')
-def logging_message(request, data):
-    '''处理控制器发过来的报警信息'''
-    logger.bind(event='logging')
-    logger.info('Received logging message from controller.', data=data)
-
+@events.reg('item_<int:id>_status')
+def update_item_status(request, data, id):
     # Propogate to frontend.
-    send_to_frontend('logging', data)
+    send_to_frontend('item_%s_status' % (id), data)
+
+
+@events.reg('item_<int:id>_update')
+def update_item_data(request, data, id):
+    # Propogate to frontend.
+    send_to_frontend('item_%s_update' % (id), data)
