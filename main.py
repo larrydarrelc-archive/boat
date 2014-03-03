@@ -33,12 +33,19 @@ def setup_database(path):
     store.configure(path=path)
 
 
+def setup_items(path):
+    from core import items
+
+    items.configure(path)
+
+
 def run():
     config = Config()
     config.from_object('configs.default')
 
     setup_logging(config)
     setup_database(config.get('DB_PATH'))
+    setup_items(config.get('ITEMS_CONF'))
 
     backend_app = backend.build(**config)
     backend_app.run()
