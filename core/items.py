@@ -14,9 +14,10 @@ Item config example:
 
 import yaml
 import json
+from time import time as now
 
 from core.sqlstore import store
-from common.constants import ItemsStatus
+from common.constants import ItemsStatus, LoggingStatus
 
 # Loaded items pool
 # FIXME Use a context stack to store it.
@@ -29,6 +30,7 @@ class Item(dict):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self._is_created = False
+        self._log_record_id = None
 
         # FIXME default key
         self['id'] = self.get('id')
@@ -61,7 +63,7 @@ class Item(dict):
         return True
 
     def _must_created(self):
-        '''Create item' record if not exists.'''
+        '''Create item's record if not exists.'''
         if self._is_created:
             return
 
@@ -70,19 +72,74 @@ class Item(dict):
             raise WrongDefination('You should set item id before update it.')
 
         cur = store.get_cursor()
+
+        # Get a triggered logging record if exists.
+        cur.execute('SELECT `id` FROM `logging` '
+                    'WHERE `item_id` = ? AND `status` = ?',
+                    (id, LoggingStatus.TRIGGERED))
+        rv = cur.fetchone()
+        if rv:
+            self._log_record_id = rv[0]
+
+        # Setup item record.
         cur.execute('SELECT COUNT(*) FROM `items` WHERE `id` = ?', (id, ))
         rv = cur.fetchone()
         if rv[0] != 0:
             self._is_created = True
             return
 
-        # Create new records.
+        # Not exists, create a new item record.
         cur.execute('INSERT INTO `items` (`id`, `status`, `data`, `meta`) '
                     'VALUES (?, ?, ?, ?)',
                     (id, self['status'], self['stat'], json.dumps(self)))
         store.commit()
         cur.close()
         self._is_created = True
+
+    def trigger(self):
+        '''Make a trigger log.'''
+        if self._log_record_id:
+            return
+
+        status = LoggingStatus.TRIGGERED
+        cur = store.get_cursor()
+
+        cur.execute('INSERT INTO `logging` '
+                    '(`item_id`, `status`, `triggered_at`) '
+                    'VALUES (?, ?, ?)',
+                    (self['id'], status, now()))
+        self._log_record_id = cur.lastrowid
+        store.commit()
+        cur.close()
+
+    def confirm(self):
+        '''Make a confirm log.'''
+        if not self._log_record_id:
+            return
+
+        status = LoggingStatus.CONFIRMED
+        cur = store.get_cursor()
+
+        cur.execute('UPDATE `logging` SET `status` = ?, `confirmed_at` = ? '
+                    'WHERE `id` = ?',
+                    (status, now(), self._log_record_id))
+        store.commit()
+        cur.close()
+
+    def disappear(self):
+        '''Make a disappear log.'''
+        if not self._log_record_id:
+            return
+
+        status = LoggingStatus.DISAPPEARED
+        cur = store.get_cursor()
+
+        cur.execute('UPDATE `logging` SET `status` = ?, `confirmed_at` = ? '
+                    'WHERE `id` = ?',
+                    (status, now(), self._log_record_id))
+        self._log_record_id = None
+        store.commit()
+        cur.close()
 
     def update_stat(self, stat):
         '''Update item's stat.
@@ -112,6 +169,12 @@ class Item(dict):
         store.commit()
         cur.close()
 
+        # Update log when status had changed.
+        if status == ItemsStatus.WARNING:
+            self.trigger()
+        elif status == ItemsStatus.NORMAL:
+            self.disappear()
+
     def update(self, stat, status):
         '''Update item.
 
@@ -129,6 +192,12 @@ class Item(dict):
                     (stat, status, self['id']))
         store.commit()
         cur.close()
+
+        # Update log when status had changed.
+        if status == ItemsStatus.WARNING:
+            self.trigger()
+        elif status == ItemsStatus.NORMAL:
+            self.disappear()
 
     def __str__(self):
         return yaml.dump({
