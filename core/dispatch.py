@@ -73,6 +73,7 @@ class Register(object):
         '''
         def wrapper(func):
             self.register_callback(event_name, func)
+            return func
         return wrapper
 
     def get(self, event_name):
