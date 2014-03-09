@@ -17,7 +17,7 @@ CREATE TABLE `logging` (
     /* 0 is triggered, 1 is confirmed, 2 is disappeared */
     `status` INTEGER NOT NULL default 0,
 
-    `triggered_at` DATETIME default current_timestamp,
-    `confirmed_at` DATETIME default current_timestamp,
-    `disappeared_at` DATETIME default current_timestamp
+    `triggered_at` DATETIME default NULL,
+    `confirmed_at` DATETIME default NULL,
+    `disappeared_at` DATETIME default NULL
 );
