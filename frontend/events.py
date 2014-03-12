@@ -49,6 +49,7 @@ def item_status(request, data):
 
 @events.reg('item_confirm')
 def item_confirm(request, id):
+    '''Confirm a warning record.'''
     id = int(id)
     logger.bind(item_id=id)
 
@@ -67,7 +68,32 @@ def item_confirm(request, id):
     ClientHandler.broadcast('item_update:%s' % item.to_json())
 
 
+@events.reg('item_history')
+def item_history(request, id):
+    '''Retrieve item's warning history.'''
+    id = int(id)
+    logger.bind(item_id=id)
+
+    item = items_pool.get(id)
+    if item is None:
+        logger.warning('Cannot find item %d' % (id))
+        return
+
+    request.write('item_history:%s' % (json.dumps(item.history)))
+
+
+@events.reg('items_history')
+def items_history(request, raw):
+    '''Get all items' warning history.'''
+    history = []
+    for item in items_pool.values():
+        history = history + item.history
+    history.sort(key=lambda x: x['id'], reverse=True)
+
+    request.write('items_history:%s' % (json.dumps(history)))
+
+
 @events.reg('items')
 def items(request, raw):
-    '''Get all item's status.'''
+    '''Get all items' status.'''
     request.write('items:%s' % (json.dumps(items_pool.values())))

@@ -217,6 +217,27 @@ class Item(dict):
         elif status == ItemsStatus.NORMAL:
             self.disappear()
 
+    @property
+    def history(self):
+        def wrap(values):
+            # TODO use dict row factory
+            keys = ['id', 'item_id', 'status',
+                    'triggered_at', 'confirmed_at', 'disappeared_at']
+            rv = dict(zip(keys, values))
+            rv.pop('item_id')
+            rv['item'] = self
+
+            return rv
+
+        item_id = self.get('id')
+        if item_id is None:
+            return
+
+        cur = store.get_cursor()
+        cur.execute('SELECT * FROM `logging` WHERE `item_id` = ?',
+                    (item_id,))
+        return list(map(wrap, cur.fetchall()))
+
     def __str__(self):
         return yaml.dump({
             'id': self.get('id'),
