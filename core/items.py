@@ -103,20 +103,13 @@ class Item(dict):
     def trigger(self):
         '''Make a trigger log.'''
 
-        cur = store.get_cursor()
         log_id = self['log'].get('id')
-
-        # Cancel previous confirmed record.
-        #self['log']['confirmed_at'] = None
 
         # Triggered before, not add new reocrd.
         if log_id:
-            cur.execute('UPDATE `logging` SET `confirmed_at` = NULL '
-                        'WHERE `id` = ?',
-                        (log_id,))
-            store.commit()
             return
 
+        cur = store.get_cursor()
         status = LoggingStatus.TRIGGERED
         self['log']['triggered_at'] = now()
         cur.execute('INSERT INTO `logging` '
