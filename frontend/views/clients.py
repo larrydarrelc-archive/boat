@@ -5,6 +5,7 @@ import structlog
 import tornado.websocket
 
 from frontend.compat import WebSocketMessageRequest
+from common.utils import format_exception
 
 
 __all__ = ['ClientHandler']
@@ -54,7 +55,10 @@ class ClientHandler(tornado.websocket.WebSocketHandler):
             self.dispatcher(WebSocketMessageRequest(msg, self))
         except Exception as e:
             # TODO Let's talk about error handling here.
-            self.logger.warn('Got error while dispatching %r %r' % (msg, e))
+            self.logger.warn('Got error while dispatching {0} {1}'.format(
+                msg,
+                format_exception(e)
+            ))
 
     def on_close(self):
         self.logger.info('Connection closed.')
