@@ -81,12 +81,15 @@ class Register(object):
 
         :param event_name: event name
         '''
-        for k, v in self.callbacks.items():
-            pattern = self.patterns[k]
-            matched = pattern['pattern'].match(event_name)
-            if matched is not None:
-                return v, dict(zip(pattern['params'], matched.groups()))
-        return None
+        return self.callbacks.get(event_name), {}
+
+        # FIXME
+        #for k, v in self.callbacks.items():
+            #pattern = self.patterns[k]
+            #matched = pattern['pattern'].match(event_name)
+            #if matched is not None:
+                #return v, dict(zip(pattern['params'], matched.groups()))
+        #return None
 
 
 class BaseDispatcher(Register):
