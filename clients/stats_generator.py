@@ -11,7 +11,7 @@ from backend.utils import send_to_backend
 IDS = range(1, 3)
 STATS_RANGE = [0, 50]
 THRESHOLD = 25
-EVENT_NAME = 'item_%d_status'
+EVENT_NAME = 'item_status'
 
 
 def generate_message(item_id):
@@ -34,7 +34,7 @@ def run(interval=None):
         while True:
             id = random.choice(IDS)
             message = generate_message(id)
-            client = send_to_backend(EVENT_NAME % (id), message, client)
+            client = send_to_backend(EVENT_NAME, message, client)
             time.sleep(interval)
     except KeyboardInterrupt:
         if client is not None:

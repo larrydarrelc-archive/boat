@@ -30,13 +30,14 @@ class Item(dict):
     def __init__(self, *args, **kwargs):
         super(Item, self).__init__(*args, **kwargs)
         self._is_created = False
-        self._log_record_id = None
 
         # FIXME default key
         self['id'] = self.get('id')
         self['name'] = self.get('name')
         self['stat'] = self.get('stat', 0)
         self['status'] = self.get('status', ItemsStatus.NORMAL)
+        self['log'] = dict(id=None, triggered_at=None, confirmed_at=None,
+                           disappeared_at=None)
 
     @staticmethod
     def from_dict(origin):
@@ -74,12 +75,15 @@ class Item(dict):
         cur = store.get_cursor()
 
         # Get a triggered logging record if exists.
-        cur.execute('SELECT `id` FROM `logging` '
+        cur.execute('SELECT * FROM `logging` '
                     'WHERE `item_id` = ? AND `status` = ?',
                     (id, LoggingStatus.TRIGGERED))
         rv = cur.fetchone()
         if rv:
-            self._log_record_id = rv[0]
+            self['log']['id'] = rv[0]
+            self['log']['triggered_at'] = rv[1]
+            self['log']['confirmed_at'] = rv[2]
+            self['log']['disappeared_at'] = rv[3]
 
         # Setup item record.
         cur.execute('SELECT COUNT(*) FROM `items` WHERE `id` = ?', (id, ))
@@ -98,48 +102,69 @@ class Item(dict):
 
     def trigger(self):
         '''Make a trigger log.'''
-        if self._log_record_id:
+
+        cur = store.get_cursor()
+        log_id = self['log'].get('id')
+
+        # Cancel previous confirmed record.
+        #self['log']['confirmed_at'] = None
+
+        # Triggered before, not add new reocrd.
+        if log_id:
+            cur.execute('UPDATE `logging` SET `confirmed_at` = NULL '
+                        'WHERE `id` = ?',
+                        (log_id,))
+            store.commit()
             return
 
         status = LoggingStatus.TRIGGERED
-        cur = store.get_cursor()
-
+        self['log']['triggered_at'] = now()
         cur.execute('INSERT INTO `logging` '
                     '(`item_id`, `status`, `triggered_at`) '
                     'VALUES (?, ?, ?)',
-                    (self['id'], status, now()))
-        self._log_record_id = cur.lastrowid
+                    (self['id'], status, self['log']['triggered_at']))
         store.commit()
+        self['log']['id'] = cur.lastrowid
         cur.close()
 
     def confirm(self):
         '''Make a confirm log.'''
-        if not self._log_record_id:
+
+        # No triggered log before, so nothing to do.
+        if not self['log'].get('id'):
             return
 
         status = LoggingStatus.CONFIRMED
         cur = store.get_cursor()
 
+        self['log']['confirmed_at'] = now()
         cur.execute('UPDATE `logging` SET `status` = ?, `confirmed_at` = ? '
                     'WHERE `id` = ?',
-                    (status, now(), self._log_record_id))
+                    (status, self['log']['confirmed_at'], self['log']['id']))
         store.commit()
         cur.close()
 
     def disappear(self):
         '''Make a disappear log.'''
-        if not self._log_record_id:
+
+        # No triggered log before, so nothing to do.
+        if self['log'].get('id') is None:
             return
 
         status = LoggingStatus.DISAPPEARED
         cur = store.get_cursor()
 
-        cur.execute('UPDATE `logging` SET `status` = ?, `confirmed_at` = ? '
+        self['log']['disappeared_at'] = now()
+        self['log']['confirmed_at'] = None
+        self['log']['triggered_at'] = None
+        cur.execute('UPDATE `logging` SET `status` = ?, `disappeared_at` = ? '
                     'WHERE `id` = ?',
-                    (status, now(), self._log_record_id))
-        self._log_record_id = None
+                    (status, self['log']['disappeared_at'], self['log']['id']))
         store.commit()
         cur.close()
+
+        # Rotate to a new record.
+        self['log']['id'] = None
 
     def update_stat(self, stat):
         '''Update item's stat.
@@ -204,6 +229,9 @@ class Item(dict):
             'id': self.get('id'),
             'name': self['name']
         })
+
+    def to_json(self):
+        return json.dumps(self)
 
 
 class WrongDefination(ValueError):

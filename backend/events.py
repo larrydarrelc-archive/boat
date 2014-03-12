@@ -20,13 +20,13 @@ def terminate(request, data):
     request.close()
 
 
-@events.reg('item_<int:id>_status')
-def update_item_status(request, data, id):
+@events.reg('item_status')
+def update_item_status(request, data):
     # Propogate to frontend.
-    send_to_frontend('item_%s_status' % (id), data)
+    send_to_frontend('item_status', data)
 
 
-@events.reg('item_<int:id>_update')
-def update_item_data(request, data, id):
+@events.reg('item_update')
+def update_item_data(request, data):
     # Propogate to frontend.
-    send_to_frontend('item_%s_update' % (id), data)
+    send_to_frontend('item_update', data)
