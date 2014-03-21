@@ -1,0 +1,3 @@
+[submodule "client"]
+	path = client
+	url = https://hbccbh@bitbucket.org/hbccbh/boat-frontend.git
